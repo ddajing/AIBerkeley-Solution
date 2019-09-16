@@ -87,17 +87,101 @@ def depthFirstSearch(problem):
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    from util import Stack
+    from collections import defaultdict
+    stack = Stack()
+    visited = defaultdict()
+    
+    if problem.isGoalState(problem.getStartState()):
+        return []
+    
+    stack.push((problem.getStartState(), []))
+    visited[problem.getStartState()] = 1
+
+    while not stack.isEmpty():
+        coord, path = stack.pop()
+        visited[coord] = 1
+        if problem.isGoalState(coord):
+            return path 
+        
+        successors = problem.getSuccessors(coord)
+
+        for succ in successors:
+            if succ[0] not in visited:
+                stack.push((succ[0], path + [succ[1]]))
+    
+    return []
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    from util import Queue
+    from collections import defaultdict
+
+    queue = Queue()
+    visited = defaultdict()
+
+    if problem.isGoalState(problem.getStartState()):
+        return []
+
+    queue.push((problem.getStartState(), []))
+    visited[problem.getStartState()] = 1
+
+    while not queue.isEmpty():
+        coord, path = queue.pop()
+
+        if problem.isGoalState(coord):
+            return path
+
+        successors = problem.getSuccessors(coord)
+
+        for succ in successors:
+            if succ[0] not in visited:
+                visited[succ[0]] = 1
+                queue.push((succ[0], path + [succ[1]]))
+
+    return []
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    from util import PriorityQueue
+    from collections import defaultdict
+    pq = PriorityQueue()
+    min_cost = defaultdict()
+    path = defaultdict(list)
+    visited = defaultdict()
+
+    if problem.isGoalState(problem.getStartState()):
+        return []
+
+    min_cost[problem.getStartState()] = 0
+    path[problem.getStartState()] = []
+    pq.push(problem.getStartState(), 0)
+
+    while not pq.isEmpty():
+        coord = pq.pop()
+        if problem.isGoalState(coord):
+            return path[coord]
+
+        if coord in visited:
+            continue
+        else:
+            visited[coord] = True
+
+        successors = problem.getSuccessors(coord)
+
+        for succ in successors:
+            if succ[0] not in visited:
+                new_path = path[coord] + [succ[1]]
+                new_cost = problem.getCostOfActions(new_path)
+
+                if succ[0] not in min_cost or new_cost < min_cost[succ[0]]:
+                    min_cost[succ[0]] = new_cost
+                    path[succ[0]] = new_path
+                    pq.update(succ[0], new_cost)
+
+    return []
 
 def nullHeuristic(state, problem=None):
     """
@@ -109,7 +193,44 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    from util import PriorityQueue
+    from collections import defaultdict
+    pq = PriorityQueue()
+    heuristic_cost = defaultdict()
+    path = defaultdict(list)
+    visited = defaultdict()
+
+    if problem.isGoalState(problem.getStartState()):
+        return []
+
+    heuristic_cost[problem.getStartState()] = heuristic(problem.getStartState(), problem)
+    path[problem.getStartState()] = []
+    pq.push(problem.getStartState(), heuristic_cost[problem.getStartState()])
+
+    while not pq.isEmpty():
+        coord = pq.pop()
+        if problem.isGoalState(coord):
+            return path[coord]
+
+        if coord in visited:
+            continue
+        else:
+            visited[coord] = True
+
+        successors = problem.getSuccessors(coord)
+
+        for succ in successors:
+            if succ[0] not in visited:
+                new_path = path[coord] + [succ[1]]
+                new_cost = problem.getCostOfActions(new_path) + heuristic(succ[0], problem)
+
+                if succ[0] not in heuristic_cost or new_cost < heuristic_cost[succ[0]]:
+                    heuristic_cost[succ[0]] = new_cost
+                    path[succ[0]] = new_path
+                    pq.update(succ[0], new_cost)
+
+    return []
+
 
 
 # Abbreviations
